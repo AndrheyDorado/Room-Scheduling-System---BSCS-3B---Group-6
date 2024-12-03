@@ -9,61 +9,59 @@ ob_end_flush();
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title> Scheduling System</title>
 
-  <title>Scheduling System</title>
+  <!-- Add your header include if necessary -->
+  <?php include('./header.php'); ?>
 
-<?php include('./header.php'); ?>
-<?php 
-if(isset($_SESSION['login_id']))
-header("location:index.php?page=home");
-?>
+  <?php 
+  if(isset($_SESSION['login_id']))
+    header("location:index.php?page=home");
+  ?>
 
-</head>
-
-<style>
-    /* General Body Styling */
+  <style>
+    /* Global Body Styling */
     body {
         width: 100%;
         height: 100%;
         font-family: 'Poppins', sans-serif;
         margin: 0;
         padding: 0;
-        background-color: #f4f6f9;
-    }
-
-    main#main {
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        background-color: #f4f6f9;
     }
 
-    /* Left Section */
+    /* Main wrapper that holds the background image and form */
+    main#main {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Left section with background image */
     #login-left {
         position: absolute;
         left: 0;
         width: 60%;
         height: 100%;
-        background: #59b6ec61;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         background: url(assets/uploads/<?php echo $_SESSION['system']['cover_img'] ?>);
         background-repeat: no-repeat;
         background-size: cover;
-        box-shadow: inset 0 0 0 10000px rgba(0, 0, 0, 0.6);
+        z-index: -1; /* To ensure content is above this */
     }
 
-    /* Right Section */
+    /* Right section - Login form */
     #login-right {
-        position: absolute;
-        right: 0;
+        position: relative;
         width: 40%;
         height: 100%;
-        background: #ffffff;
         display: flex;
-        align-items: center;
         justify-content: center;
+        align-items: center;
     }
 
     /* Card Styling */
@@ -73,6 +71,8 @@ header("location:index.php?page=home");
         padding: 2em;
         border-radius: 10px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background: white;
+        text-align: center;
     }
 
     .card-body {
@@ -82,13 +82,13 @@ header("location:index.php?page=home");
     .card-header {
         background-color: #007bff;
         color: #ffffff;
-        text-align: center;
         font-size: 1.5rem;
         padding: 1em;
         border-radius: 8px 8px 0 0;
         font-weight: 600;
     }
 
+    /* Form Inputs Styling */
     .form-group {
         margin-bottom: 1.5em;
     }
@@ -116,7 +116,7 @@ header("location:index.php?page=home");
         outline: none;
     }
 
-    /* Submit Button */
+    /* Submit Button Styling */
     .btn-primary {
         width: 100%;
         padding: 12px;
@@ -133,7 +133,7 @@ header("location:index.php?page=home");
         background-color: #0056b3;
     }
 
-    /* Alert */
+    /* Alert Styling */
     .alert-danger {
         color: #d9534f;
         background-color: #f2dede;
@@ -143,7 +143,7 @@ header("location:index.php?page=home");
         margin-top: 10px;
     }
 
-    /* Logo */
+    /* Logo (optional, if you want to add logo above the form) */
     .logo {
         margin: auto;
         font-size: 6rem;
@@ -172,58 +172,54 @@ header("location:index.php?page=home");
             max-width: 350px;
         }
     }
+  </style>
 
-</style>
-
+</head>
 <body>
-  <main id="main" class="bg-dark">
+
+  <main id="main">
     <!-- Left Section with Background Image -->
     <div id="login-left">
     </div>
 
     <!-- Right Section with Login Form -->
     <div id="login-right">
-        <div class="card">
-            <div class="card-header">
-                <div class="logo">
-                    <i class="fas fa-school"></i>
-                </div>
-                School Login
+      <div class="card">
+        <div class="card-body">
+          <form id="login-form">
+            <div class="form-group">
+              <label for="username" class="control-label">Username</label>
+              <input type="text" id="username" name="username" class="form-control" required>
             </div>
-            <div class="card-body">
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="username" class="control-label">Username</label>
-                        <input type="text" id="username" name="username" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password" class="control-label">Password</label>
-                        <input type="password" id="password" name="password" class="form-control" required>
-                    </div>
-                    <center>
-                        <button type="submit" class="btn-primary">Login</button>
-                    </center>
-                </form>
+            <div class="form-group">
+              <label for="password" class="control-label">Password</label>
+              <input type="password" id="password" name="password" class="form-control" required>
             </div>
+            <center>
+              <button type="submit" class="btn-sm btn-block btn-wave col-md-4 btn-primary">Login</button>
+            </center>
+          </form>
         </div>
+      </div>
     </div>
+
   </main>
 
   <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
 
+  <!-- JavaScript for Form Submission -->
   <script>
-    // Handle login form submission
     $('#login-form').submit(function(e) {
         e.preventDefault();
         $('#login-form button[type="submit"]').attr('disabled', true).html('Logging in...');
         if ($(this).find('.alert-danger').length > 0)
             $(this).find('.alert-danger').remove();
-        
+
         $.ajax({
             url: 'ajax.php?action=login',
             method: 'POST',
             data: $(this).serialize(),
-            error: err => {
+            error: function(err) {
                 console.log(err);
                 $('#login-form button[type="submit"]').removeAttr('disabled').html('Login');
             },
@@ -238,5 +234,6 @@ header("location:index.php?page=home");
         });
     });
   </script>
+
 </body>
 </html>
